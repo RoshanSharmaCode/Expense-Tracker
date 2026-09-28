@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 
-export default authMiddleware = async (req, resizeBy, next) => {
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -18,7 +18,7 @@ export default authMiddleware = async (req, resizeBy, next) => {
 
     const user = await User.findById(payload.id).select("-password");
     if (!user) {
-      return res.status(401).josn({
+      return res.status(401).json({
         success: false,
         message: "User not found",
       });
@@ -33,3 +33,5 @@ export default authMiddleware = async (req, resizeBy, next) => {
     });
   }
 };
+
+export default authMiddleware;

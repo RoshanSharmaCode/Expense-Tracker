@@ -4,10 +4,10 @@ import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const userToken = (userId) => {
-  jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
 };
 
-export const registorUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -41,9 +41,9 @@ export const registorUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword });
-    const token = createToken(user._id);
+    const token = userToken(user._id);
 
-    res.status(201).josn({
+    res.status(201).json({
       success: true,
       token,
       user: {
@@ -86,12 +86,12 @@ export const userLogin = async (req, res) => {
 
     if (!match) {
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "Invalid email or passwprd",
       });
     }
 
-    const token = createToken(user._id);
+    const token = userToken(user._id);
 
     res.status(200).json({
       success: true,
@@ -146,10 +146,10 @@ export const updateUser = async (req, res) => {
   }
 
   try {
-    const exists = await User.findById({ email, _id: { $ne: req.user.id } });
+    const exists = await User.findOne({ email, _id: { $ne: req.user.id } });
 
     if (exists) {
-      return req.status(409).json({
+      return res.status(409).json({
         status: false,
         message: "Email already in use",
       });
@@ -196,7 +196,7 @@ export const updatePassword = async (req, res) => {
 
     const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) {
-      return res.status(401).josn({
+      return res.status(401).json({
         success: false,
         message: "Password is incorrect",
       });
