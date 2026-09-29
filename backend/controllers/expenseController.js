@@ -1,0 +1,212 @@
+import expenseModel from "../models/expenseModel.js";
+import getDateRange from "../utils/dataFilter.js";
+import XLSX from "xlsx";
+
+// Add expense
+export const addExpense = async (req, res) => {
+  const userId = req.user._id;
+  const { description, amount, category, date } = req.body;
+
+  try {
+    if (!description || !amount || !category || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const newExpense = new expenseModel({
+      userId,
+      description,
+      amount,
+      category,
+      date: new Date(date),
+    });
+    await newExpense.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Expense add successfully!",
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Get all expense
+export const getAllExpense = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const expense = await expenseModel.find({ userId }).sort({ date: -1 });
+    res.status(200).json(expense);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Update expense
+export const updateExpense = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { description, amount } = req.body;
+
+  try {
+    if (!description || !amount) {
+      return res.status(400).josn({
+        success: false,
+        message: "Both fields are required",
+      });
+    }
+
+    const expense = await expenseModel.findOneAndUpdate(
+      { _id: id, userId },
+      { description, amount },
+      { new: true },
+    );
+
+    if (!expense) {
+      return res.status(400).josn({
+        success: false,
+        message: "Failed to update expense",
+      });
+    }
+
+    res.status(200).josn({
+      success: true,
+      message: "Expense updated successfully",
+      date: expense,
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Delete expense
+export const deleteExpense = async (req, res) => {
+  try {
+    const expense = await expenseModel.findByIdAndDelete({
+      _id: req.params.id,
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully",
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Download expense excel file
+export const downloadExpenseExcel = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const expense = await expenseModel.find({ userId }).sort({ date: -1 });
+    const plainData = expense.map((exp) => ({
+      Description: exp.description,
+      Amount: exp.amount,
+      Category: exp.category,
+      Date: new Date(exp.date).toLocaleDateString(),
+    }));
+
+    // Convert JSON data to worksheet
+    const workSheet = XLSX.utils.json_to_sheet(plainData);
+
+    // Create workbook
+    const workBook = XLSX.utils.book_new();
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workBook, workSheet, "expense");
+
+    // Generate Excel file as a buffer
+    const excelBuffer = XLSX.write(workBook, {
+      bookType: "xlsx",
+      type: "buffer",
+    });
+
+    // Tell browser that this is an Excel file
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="expense_details.xlsx"',
+    );
+
+    // Send file to browser
+    res.send(excelBuffer);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Get expense overview
+export const getExpenseOverview = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { range = "monthly" } = req.params;
+    const { start, end } = getDateRange(range);
+
+    const expense = await expenseModel
+      .find({
+        userId,
+        date: { $gte: start, $lte: end },
+      })
+      .sort({ date: -1 });
+
+    const totalExpense = expense.reduce((acc, cur) => acc + cur.amount, 0);
+    const averageExpense =
+      expense.length > 0 ? totalExpense / expense.length : 0;
+    const numberOfTransactions = expense.length;
+
+    const recentTransactions = expense.slice(0, 5);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalExpense,
+        averageExpense,
+        numberOfTransactions,
+        recentTransactions,
+        range,
+      },
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
