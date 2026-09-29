@@ -2,6 +2,7 @@ import incomeModel from "../models/incomeModel.js";
 import XLSX from "xlsx";
 import getDateRange from "../utils/dataFilter.js";
 
+// Add income
 export const addIncome = async (req, res) => {
   const userId = req.user._id;
   const { description, amount, category, date } = req.body;
@@ -24,7 +25,7 @@ export const addIncome = async (req, res) => {
     await newIncome.save();
 
     res.status(200).json({
-      success: false,
+      success: true,
       message: "Income add successfully!",
     });
   } catch (error) {
@@ -36,6 +37,7 @@ export const addIncome = async (req, res) => {
   }
 };
 
+// Get all income
 export const getAllIncome = async (req, res) => {
   const userId = req.user._id;
 
@@ -51,6 +53,7 @@ export const getAllIncome = async (req, res) => {
   }
 };
 
+// Update income
 export const updateIncome = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
@@ -91,6 +94,7 @@ export const updateIncome = async (req, res) => {
   }
 };
 
+// Delete income
 export const deleteIncome = async (req, res) => {
   try {
     const income = await incomeModel.findByIdAndDelete({ _id: req.params.id });
@@ -115,6 +119,7 @@ export const deleteIncome = async (req, res) => {
   }
 };
 
+// Download Income excel file
 export const downloadIncomeExcel = async (req, res) => {
   const userId = req.user._id;
 
@@ -127,11 +132,34 @@ export const downloadIncomeExcel = async (req, res) => {
       Date: new Date(inc.date).toLocaleDateString(),
     }));
 
+    // Convert JSON data to worksheet
     const workSheet = XLSX.utils.json_to_sheet(plainData);
+
+    // Create workbook
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, "incomeModel");
-    XLSX.writeFile(workBook, "income_details.xlsx");
-    XLSX.download("income_details.xlsx");
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workBook, workSheet, "Income");
+
+    // Generate Excel file as a buffer
+    const excelBuffer = XLSX.write(workBook, {
+      bookType: "xlsx",
+      type: "buffer",
+    });
+
+    // Tell browser that this is an Excel file
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="income_details.xlsx"',
+    );
+
+    // Send file to browser
+    res.send(excelBuffer);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({
@@ -141,6 +169,7 @@ export const downloadIncomeExcel = async (req, res) => {
   }
 };
 
+// Get income overview
 export const getIncomeOverview = async (req, res) => {
   try {
     const userId = req.user._id;
