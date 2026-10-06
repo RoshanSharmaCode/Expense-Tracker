@@ -3,6 +3,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import Login from "./components/login";
+import Signup from "./components/Signup";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -48,7 +49,12 @@ const App = () => {
   };
 
   const handleLogin = (userData, remember = false, tokenFromApi = null) => {
-    persisAuth(userData, tokenFromApi, remember);
+    persistAuth(userData, tokenFromApi, remember);
+    navigate("/");
+  };
+
+  const handleSignup = (userData, remember = false, tokenFromApi = null) => {
+    persistAuth(userData, tokenFromApi, remember);
     navigate("/");
   };
 
@@ -56,6 +62,8 @@ const App = () => {
     <>
       <Routes>
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/signup" element={<Signup onSignup={handleSignup} />} />
+
         <Route element={<Layout user={user} onLogout={handleLogout} />}>
           <Route path="/" element={<Dashboard />} />
         </Route>

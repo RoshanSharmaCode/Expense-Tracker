@@ -21,7 +21,7 @@ const Login = ({ onLogin, API_URL = import.meta.env.VITE_API_URL }) => {
     return res.data;
   };
 
-  const persisAuth = (profile, token) => {
+  const persistAuth = (profile, token) => {
     const storage = rememberMe ? localStorage : sessionStorage;
     try {
       if (token) storage.setItem("token", token);
@@ -67,7 +67,7 @@ const Login = ({ onLogin, API_URL = import.meta.env.VITE_API_URL }) => {
       }
 
       if (!profile) profile = { email };
-      persisAuth(profile, token);
+      persistAuth(profile, token);
 
       if (typeof onLogin === "function") {
         try {
