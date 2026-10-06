@@ -5,17 +5,19 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Navbar = ({ user: propUser, onLogout }) => {
   const navigate = useNavigate();
   const menuRef = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const user = propUser || {
-    name: "",
-    email: "",
-  };
+  const [user, setUser] = useState(
+    propUser || {
+      name: "",
+      email: "",
+    },
+  );
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -23,7 +25,7 @@ const Navbar = ({ user: propUser, onLogout }) => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await axios.get(`${BASE_URL}/user/me`, {
+        const response = await axios.get(`${BASE_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

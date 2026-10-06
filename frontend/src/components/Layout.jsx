@@ -26,7 +26,7 @@ import {
 import axios from "axios";
 import { Outlet } from "react-router-dom";
 
-const API_BASE = import.meta.env.BASE_URL;
+const API_BASE = import.meta.env.VITE_API_URL;
 const CATEGORY_ICONS = {
   Food: <Utensils className="w-4 h-4" />,
   Housing: <Home className="w-4 h-4" />,
@@ -86,8 +86,8 @@ const Layout = ({ user, onLogout }) => {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const [incomeRes, expenseRes] = await Promise.all([
-        axios.get(`${API_BASE}/income/get`, { headers }),
-        axios.get(`${API_BASE}/expense/get`, { headers }),
+        axios.get(`${API_BASE}/api/income/get`, { headers }),
+        axios.get(`${API_BASE}/api/expense/get`, { headers }),
       ]);
 
       const incomes = safeArrayFromResponse(incomeRes).map((i) => ({
@@ -429,7 +429,7 @@ const Layout = ({ user, onLogout }) => {
                 <button
                   onClick={fetchTransactions}
                   disabled={loading}
-                  cclassName={styles.transactions.refreshButton}
+                  className={styles.transactions.refreshButton}
                 >
                   <RefreshCcw
                     className={styles.transactions.refreshIcon(loading)}
