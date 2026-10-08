@@ -12,6 +12,7 @@ import Login from "./components/login";
 import Signup from "./components/Signup";
 import axios from "axios";
 import Income from "./pages/Income";
+import Expense from "./pages/Expense";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -228,6 +229,16 @@ const App = () => {
           <Route
             path="/income"
             element={<Income />}
+            transactions={transactions}
+            addTransaction={addTransaction}
+            editTransaction={editTransaction}
+            deleteTransaction={deleteTransaction}
+            refreshTransactions={refreshTransactions}
+          />
+
+          <Route
+            path="/expense"
+            element={<Expense />}
             transactions={transactions}
             addTransaction={addTransaction}
             editTransaction={editTransaction}
