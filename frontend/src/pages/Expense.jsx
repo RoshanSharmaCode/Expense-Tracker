@@ -30,7 +30,7 @@ import { getTimeFrameRange, generateChartPoints } from "../components/Helper";
 import { CATEGORY_ICONS } from "../assets/color";
 import { expensePageStyles as styles } from "../assets/dummyStyles";
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
 /**
  * Helper: convert date (or datetime) to ISO by attaching client current time
@@ -61,11 +61,11 @@ function toIsoWithClientTime(dateValue) {
 
 const ExpensePage = () => {
   // Get data from outlet context including refreshTransactions
-  const { 
-    transactions: outletTransactions = [], 
-    timeFrame = "monthly", 
+  const {
+    transactions: outletTransactions = [],
+    timeFrame = "monthly",
     setTimeFrame = () => {},
-    refreshTransactions 
+    refreshTransactions,
   } = useOutletContext();
 
   const [showModal, setShowModal] = useState(false);
@@ -87,7 +87,7 @@ const ExpensePage = () => {
     type: "expense",
     category: "Food",
   });
-  const [ setOverview] = useState({
+  const [overview, setOverview] = useState({
     totalExpense: 0,
     averageExpense: 0,
     numberOfTransactions: 0,
@@ -102,24 +102,27 @@ const ExpensePage = () => {
   }, []);
 
   // Fetch overview (GET /expense/overview?range=...)
-  const fetchOverview = useCallback(async (range = timeFrame ?? "monthly") => {
-    try {
-      const res = await axios.get(`${API_BASE}/expense/overview`, {
-        headers: getAuthHeaders(),
-        params: { range },
-      });
-      const payload = res.data?.data ?? {};
-      setOverview({
-        totalExpense: payload.totalExpense ?? 0,
-        averageExpense: payload.averageExpense ?? 0,
-        numberOfTransactions: payload.numberOfTransactions ?? 0,
-        recentTransactions: payload.recentTransactions ?? [],
-        range: payload.range ?? range,
-      });
-    } catch (err) {
-      console.error("Failed to fetch expense overview:", err);
-    }
-  }, [timeFrame, getAuthHeaders]);
+  const fetchOverview = useCallback(
+    async (range = timeFrame ?? "monthly") => {
+      try {
+        const res = await axios.get(`${API_BASE}/expense/overview`, {
+          headers: getAuthHeaders(),
+          params: { range },
+        });
+        const payload = res.data?.data ?? {};
+        setOverview({
+          totalExpense: payload.totalExpense ?? 0,
+          averageExpense: payload.averageExpense ?? 0,
+          numberOfTransactions: payload.numberOfTransactions ?? 0,
+          recentTransactions: payload.recentTransactions ?? [],
+          range: payload.range ?? range,
+        });
+      } catch (err) {
+        console.error("Failed to fetch expense overview:", err);
+      }
+    },
+    [timeFrame, getAuthHeaders],
+  );
 
   // Initial load
   useEffect(() => {
@@ -135,11 +138,11 @@ const ExpensePage = () => {
   // Time frame range and chart points
   const timeFrameRange = useMemo(
     () => getTimeFrameRange(timeFrame, selectedMonth),
-    [timeFrame, selectedMonth]
+    [timeFrame, selectedMonth],
   );
   const chartPoints = useMemo(
     () => generateChartPoints(timeFrame, timeFrameRange),
-    [timeFrame, timeFrameRange]
+    [timeFrame, timeFrameRange],
   );
 
   // Function to check if a date is within a range
@@ -147,28 +150,30 @@ const ExpensePage = () => {
     const transactionDate = new Date(date);
     const startDate = new Date(start);
     const endDate = new Date(end);
-    
+
     transactionDate.setHours(0, 0, 0, 0);
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
-    
+
     return transactionDate >= startDate && transactionDate <= endDate;
   }, []);
 
   // Filter expense transactions from outlet transactions
   const expenseTransactions = useMemo(
-    () => (outletTransactions || [])
-      .filter(t => t.type === "expense")
-      .sort((a, b) => new Date(b.date) - new Date(a.date)),
-    [outletTransactions]
+    () =>
+      (outletTransactions || [])
+        .filter((t) => t.type === "expense")
+        .sort((a, b) => new Date(b.date) - new Date(a.date)),
+    [outletTransactions],
   );
 
   // Filter transactions by time frame
   const timeFrameTransactions = useMemo(
-    () => expenseTransactions.filter(t => 
-      isDateInRange(t.date, timeFrameRange.start, timeFrameRange.end)
-    ),
-    [expenseTransactions, timeFrameRange, isDateInRange]
+    () =>
+      expenseTransactions.filter((t) =>
+        isDateInRange(t.date, timeFrameRange.start, timeFrameRange.end),
+      ),
+    [expenseTransactions, timeFrameRange, isDateInRange],
   );
 
   // Filter logic — month/year use current calendar by default
@@ -176,22 +181,36 @@ const ExpensePage = () => {
     if (filter === "all") return timeFrameTransactions;
 
     const now = new Date();
-    const yearFromSelectedMonth = selectedMonth ? new Date(selectedMonth).getFullYear() : null;
-    const monthFromSelectedMonth = selectedMonth ? new Date(selectedMonth).getMonth() : null;
-    const yearFromTimeFrame = timeFrameRange?.start ? new Date(timeFrameRange.start).getFullYear() : null;
-    const monthFromTimeFrame = timeFrameRange?.start ? new Date(timeFrameRange.start).getMonth() : null;
+    const yearFromSelectedMonth = selectedMonth
+      ? new Date(selectedMonth).getFullYear()
+      : null;
+    const monthFromSelectedMonth = selectedMonth
+      ? new Date(selectedMonth).getMonth()
+      : null;
+    const yearFromTimeFrame = timeFrameRange?.start
+      ? new Date(timeFrameRange.start).getFullYear()
+      : null;
+    const monthFromTimeFrame = timeFrameRange?.start
+      ? new Date(timeFrameRange.start).getMonth()
+      : null;
 
-    return timeFrameTransactions.filter(t => {
+    return timeFrameTransactions.filter((t) => {
       const transDate = new Date(t.date);
-      
+
       if (filter === "month") {
-        const compareYear = yearFromSelectedMonth ?? yearFromTimeFrame ?? now.getFullYear();
-        const compareMonth = monthFromSelectedMonth ?? monthFromTimeFrame ?? now.getMonth();
-        return transDate.getFullYear() === compareYear && transDate.getMonth() === compareMonth;
+        const compareYear =
+          yearFromSelectedMonth ?? yearFromTimeFrame ?? now.getFullYear();
+        const compareMonth =
+          monthFromSelectedMonth ?? monthFromTimeFrame ?? now.getMonth();
+        return (
+          transDate.getFullYear() === compareYear &&
+          transDate.getMonth() === compareMonth
+        );
       }
 
       if (filter === "year") {
-        const compareYear = yearFromSelectedMonth ?? yearFromTimeFrame ?? now.getFullYear();
+        const compareYear =
+          yearFromSelectedMonth ?? yearFromTimeFrame ?? now.getFullYear();
         return transDate.getFullYear() === compareYear;
       }
 
@@ -201,27 +220,35 @@ const ExpensePage = () => {
 
   // Calculate totals
   const totalExpense = useMemo(
-    () => filteredTransactions.reduce((sum, t) => sum + Math.round(Number(t.amount || 0)), 0),
-    [filteredTransactions]
+    () =>
+      filteredTransactions.reduce(
+        (sum, t) => sum + Math.round(Number(t.amount || 0)),
+        0,
+      ),
+    [filteredTransactions],
   );
-  
+
   const averageExpense = useMemo(
-    () => filteredTransactions.length ? Math.round(totalExpense / filteredTransactions.length) : 0,
-    [filteredTransactions, totalExpense]
+    () =>
+      filteredTransactions.length
+        ? Math.round(totalExpense / filteredTransactions.length)
+        : 0,
+    [filteredTransactions, totalExpense],
   );
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    const data = chartPoints.map(point => ({ ...point, expense: 0 }));
+    const data = chartPoints.map((point) => ({ ...point, expense: 0 }));
 
-    filteredTransactions.forEach(transaction => {
+    filteredTransactions.forEach((transaction) => {
       const transDate = new Date(transaction.date);
-      const point = data.find(d =>
+      const point = data.find((d) =>
         timeFrame === "daily"
           ? d.hour === transDate.getHours()
           : timeFrame === "yearly"
-          ? d.date.getMonth() === transDate.getMonth()
-          : d.date.getDate() === transDate.getDate() && d.date.getMonth() === transDate.getMonth()
+            ? d.date.getMonth() === transDate.getMonth()
+            : d.date.getDate() === transDate.getDate() &&
+              d.date.getMonth() === transDate.getMonth(),
       );
       point && (point.expense += Math.round(Number(transaction.amount)));
     });
@@ -238,18 +265,21 @@ const ExpensePage = () => {
         url: `${API_BASE}${url}`,
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       };
-      
+
       if (data) config.data = data;
-      
+
       const response = await axios(config);
       await refreshTransactions();
       await fetchOverview(timeFrame);
-      
+
       return response;
     } catch (err) {
       console.error(`${method} request error:`, err);
       const serverMsg = err?.response?.data?.message;
-      alert(serverMsg || `Server error while ${method === 'post' ? 'adding' : method === 'put' ? 'updating' : 'deleting'} expense.`);
+      alert(
+        serverMsg ||
+          `Server error while ${method === "post" ? "adding" : method === "put" ? "updating" : "deleting"} expense.`,
+      );
       throw err;
     } finally {
       setLoading(false);
@@ -269,15 +299,18 @@ const ExpensePage = () => {
         date: toIsoWithClientTime(newTransaction.date),
       };
 
-      await handleApiRequest('post', '/expense/add', payload);
+      await handleApiRequest("post", "/expense/add", payload);
 
       // If added date is outside the current visible range, switch view to that month
       const addedDate = new Date(payload.date || newTransaction.date);
-      const addedDateInRange = addedDate >= timeFrameRange.start && addedDate <= timeFrameRange.end;
+      const addedDateInRange =
+        addedDate >= timeFrameRange.start && addedDate <= timeFrameRange.end;
 
       if (!addedDateInRange) {
         setTimeFrame("monthly");
-        setSelectedMonth(new Date(addedDate.getFullYear(), addedDate.getMonth(), 1));
+        setSelectedMonth(
+          new Date(addedDate.getFullYear(), addedDate.getMonth(), 1),
+        );
       }
 
       setNewTransaction({
@@ -305,7 +338,7 @@ const ExpensePage = () => {
         date: toIsoWithClientTime(editForm.date),
       };
 
-      await handleApiRequest('put', `/expense/update/${editingId}`, payload);
+      await handleApiRequest("put", `/expense/update/${editingId}`, payload);
       setEditingId(null);
     } catch (err) {
       // Error handled in handleApiRequest
@@ -314,8 +347,9 @@ const ExpensePage = () => {
 
   // Delete expense -> DELETE /expense/delete/:id
   const handleDeleteTransaction = async (id) => {
-    if (!id || !window.confirm("Are you sure you want to delete this expense?")) return;
-    await handleApiRequest('delete', `/expense/delete/${id}`);
+    if (!id || !window.confirm("Are you sure you want to delete this expense?"))
+      return;
+    await handleApiRequest("delete", `/expense/delete/${id}`);
   };
 
   // Export -> GET /expense/downloadexcel (server) with client fallback
@@ -331,12 +365,12 @@ const ExpensePage = () => {
       });
       const disposition = res.headers["content-disposition"];
       let filename = "expense_details.xlsx";
-      
+
       if (disposition) {
         const match = disposition.match(/filename="?(.+)"?/);
         if (match && match[1]) filename = match[1];
       }
-      
+
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
       link.download = filename;
@@ -347,14 +381,17 @@ const ExpensePage = () => {
       console.error("Export error:", err);
       // Fallback client export
       try {
-        const exportData = filteredTransactions.map(t => ({
+        const exportData = filteredTransactions.map((t) => ({
           Date: new Date(t.date).toLocaleDateString(),
           Description: t.description,
           Category: t.category,
           Amount: t.amount,
           Type: "Expense",
         }));
-        exportToExcel(exportData, `expenses_${new Date().toISOString().slice(0, 10)}`);
+        exportToExcel(
+          exportData,
+          `expenses_${new Date().toISOString().slice(0, 10)}`,
+        );
       } catch (e) {
         console.error("Fallback export failed:", e);
         alert("Failed to export data.");
@@ -362,14 +399,15 @@ const ExpensePage = () => {
     }
   };
 
-
   return (
     <div className={styles.container}>
       <div className={styles.headerCard}>
         <div className={styles.headerContainer}>
           <div>
             <h1 className={styles.headerTitle}>Expense Overview</h1>
-            <p className={styles.headerSubtitle}>Track and manage your expenses</p>
+            <p className={styles.headerSubtitle}>
+              Track and manage your expenses
+            </p>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -420,7 +458,8 @@ const ExpensePage = () => {
           value={`$${averageExpense.toLocaleString()}`}
           additionalContent={
             <div className="mt-2 text-xs text-gray-500 flex items-center">
-              <Calendar className="w-3 h-3 mr-1" /> {filteredTransactions.length} transactions
+              <Calendar className="w-3 h-3 mr-1" />{" "}
+              {filteredTransactions.length} transactions
             </div>
           }
           borderColor={styles.borderAmber}
@@ -436,7 +475,8 @@ const ExpensePage = () => {
           value={filteredTransactions.length}
           additionalContent={
             <div className="mt-2 text-xs text-gray-500 flex items-center">
-              <Calendar className="w-3 h-3 mr-1" /> {filter === "all" ? "All records" : "Filtered records"}
+              <Calendar className="w-3 h-3 mr-1" />{" "}
+              {filter === "all" ? "All records" : "Filtered records"}
             </div>
           }
           borderColor={styles.borderYellow}
@@ -447,29 +487,52 @@ const ExpensePage = () => {
         <div className={styles.chartHeader}>
           <h3 className={styles.chartTitle}>
             <BarChart2 className="w-6 h-6 text-orange-500" />
-            {timeFrame === "daily" ? "Hourly" : timeFrame === "yearly" ? "Monthly" : "Daily"} Expense Trends
-            <span className="text-sm text-gray-500 font-normal"> ({timeFrameRange.label})</span>
+            {timeFrame === "daily"
+              ? "Hourly"
+              : timeFrame === "yearly"
+                ? "Monthly"
+                : "Daily"}{" "}
+            Expense Trends
+            <span className="text-sm text-gray-500 font-normal">
+              {" "}
+              ({timeFrameRange.label})
+            </span>
           </h3>
 
-          <button
-            onClick={handleExport}
-            className={styles.chartExportButton}
-          >
+          <button onClick={handleExport} className={styles.chartExportButton}>
             <Download size={18} /> Export Data
           </button>
         </div>
 
         <div className={styles.chartHeight}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <AreaChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
               <defs>
-                <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="expenseGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="5%" stopColor="#ff9800" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#ff9800" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "#6b7280", fontSize: 12 }} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#f3f4f6"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#6b7280", fontSize: 12 }}
+              />
               <YAxis
                 axisLine={false}
                 tickLine={false}
@@ -478,7 +541,10 @@ const ExpensePage = () => {
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
               />
               <Tooltip
-                formatter={(value) => [`$${Math.round(value).toLocaleString()}`, "Expense"]}
+                formatter={(value) => [
+                  `$${Math.round(value).toLocaleString()}`,
+                  "Expense",
+                ]}
                 contentStyle={styles.tooltipContent}
               />
               <Area
@@ -499,7 +565,7 @@ const ExpensePage = () => {
                       strokeWidth={2}
                       strokeDasharray="3 3"
                     />
-                  )
+                  ),
               )}
             </AreaChart>
           </ResponsiveContainer>
@@ -511,7 +577,10 @@ const ExpensePage = () => {
           <h3 className={styles.transactionsTitle}>
             <DollarSign className="w-6 h-6 -mx-1.5 lg:-mx-2 md:-mx-0 text-orange-500" />
             Expense Transactions
-            <span className="text-sm text-gray-500 font-normal"> ({timeFrameRange.label})</span>
+            <span className="text-sm text-gray-500 font-normal">
+              {" "}
+              ({timeFrameRange.label})
+            </span>
           </h3>
 
           <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full sm:w-auto">
@@ -535,10 +604,7 @@ const ExpensePage = () => {
               </select>
             </div>
 
-            <button
-              onClick={handleExport}
-              className={styles.exportButton}
-            >
+            <button onClick={handleExport} className={styles.exportButton}>
               <Download size={18} /> Export
             </button>
           </div>
@@ -571,7 +637,8 @@ const ExpensePage = () => {
               onClick={() => setShowAll(true)}
               className={styles.viewAllButton}
             >
-              <Eye size={18} /> View All {filteredTransactions.length} Transactions
+              <Eye size={18} /> View All {filteredTransactions.length}{" "}
+              Transactions
             </button>
           )}
 
@@ -580,9 +647,13 @@ const ExpensePage = () => {
               <div className={styles.emptyStateIcon}>
                 <DollarSign className="w-8 h-8 text-orange-400" />
               </div>
-              <p className={styles.emptyStateText}>No expense transactions found</p>
+              <p className={styles.emptyStateText}>
+                No expense transactions found
+              </p>
               <p className={styles.emptyStateSubtext}>
-                {filter === "all" ? "You haven't recorded any expenses yet" : `No ${filter} transactions found`}
+                {filter === "all"
+                  ? "You haven't recorded any expenses yet"
+                  : `No ${filter} transactions found`}
               </p>
               <button
                 onClick={() => setShowModal(true)}

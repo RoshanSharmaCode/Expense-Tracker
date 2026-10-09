@@ -13,6 +13,7 @@ import Signup from "./components/Signup";
 import axios from "axios";
 import Income from "./pages/Income";
 import Expense from "./pages/Expense";
+import Profile from "./pages/Profile";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -207,6 +208,7 @@ const App = () => {
               <Layout
                 user={user}
                 onLogout={handleLogout}
+                onUpdateProfile={updateUserData}
                 transactions={transactions}
                 addTransaction={addTransaction}
                 editTransaction={editTransaction}
@@ -245,7 +247,23 @@ const App = () => {
             deleteTransaction={deleteTransaction}
             refreshTransactions={refreshTransactions}
           />
+
+          <Route
+            path="/profile"
+            element={
+              <Profile
+                user={user}
+                onUpdateProfile={updateUserData}
+                onLogout={handleLogout}
+              />
+            }
+          />
         </Route>
+
+        <Route
+          path="*"
+          element={<Navigate to={user ? "/" : "/login"} replace />}
+        />
       </Routes>
     </>
   );

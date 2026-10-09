@@ -71,7 +71,7 @@ const safeArrayFromResponse = (res) => {
   return [];
 };
 
-const Layout = ({ user, onLogout }) => {
+const Layout = ({ user, onLogout, onUpdateProfile }) => {
   const [transactions, setTransactions] = useState([]);
   const [timeFrame, setTimeFrame] = useState("monthly");
   const [loading, setLoading] = useState(false);
@@ -299,7 +299,11 @@ const Layout = ({ user, onLogout }) => {
 
   return (
     <div className={styles.layout.root}>
-      <Navbar user={user} onLogout={onLogout} />
+      <Navbar
+        user={user}
+        onUpdateProfile={onUpdateProfile}
+        onLogout={onLogout}
+      />
       <Sidebar
         user={user}
         isCollapsed={sidebarCollapsed}

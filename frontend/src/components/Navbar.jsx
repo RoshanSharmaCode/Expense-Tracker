@@ -61,6 +61,12 @@ const Navbar = ({ user: propUser, onLogout }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+  if (propUser) {
+    setUser(propUser);
+  }
+}, [propUser]);
+
   return (
     <header className={navbarStyles.header}>
       <div className={navbarStyles.container}>
