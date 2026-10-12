@@ -2,6 +2,10 @@
 
 A full-stack **Expense Tracker and Finance Dashboard** built using the MERN stack (MongoDB, Express.js, React.js, and Node.js). The application helps users manage income and expenses, monitor their financial activity, analyze spending patterns, and export financial reports.
 
+## 🚀 Live Demo
+
+**Try the application:** [Expense Tracker & Finance Dashboard](https://expense-tracker-fqu8.vercel.app/)
+
 ## ✨ Features
 
 ### 🔐 Authentication & Security
