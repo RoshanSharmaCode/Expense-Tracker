@@ -140,11 +140,9 @@ Install the following before running the project:
 ### 1. Clone the Repository
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone https://github.com/RoshanSharmaCode/Expense-Tracker.git
 cd expense-tracker
 ```
-
-Replace `YOUR_REPOSITORY_URL` with your GitHub repository URL.
 
 ### 2. Configure the Backend
 
@@ -175,7 +173,7 @@ Do not commit your `.env` file or expose your database credentials or JWT secret
 Start the backend using the script defined in your `server/package.json`. For example, if your project has a `dev` script:
 
 ```bash
-npm run dev
+npm start
 ```
 
 ### 3. Configure the Frontend
@@ -204,8 +202,6 @@ npm run dev
 ```
 
 Open the local URL printed by Vite in your terminal, usually `http://localhost:5173`.
-
-> **Note:** The commands and folder names above assume a `client` and `server` structure. Adjust them to match your repository and available npm scripts.
 
 ## 🔑 Authentication Flow
 
