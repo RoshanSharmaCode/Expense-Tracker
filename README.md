@@ -76,37 +76,54 @@ The application follows a client-server architecture.
 
 ## 📁 Project Structure
 
-The exact structure may differ slightly depending on your repository.
-
 ```text
-expense-tracker/
-├── client/                    # React frontend
+Expense-Tracker/
+├── backend/
+│   ├── config/                 # Database and application configuration
+│   ├── controllers/            # Request handlers and business logic
+│   ├── middleware/             # Authentication and request middleware
+│   ├── models/                 # MongoDB/Mongoose models
+│   ├── routes/                 # API route definitions
+│   ├── utils/                  # Backend utility functions
+│   ├── .env                    # Backend environment variables (not committed)
+│   ├── .gitignore
+│   ├── notes.md
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js               # Backend entry point
+│
+├── frontend/
+│   ├── public/                 # Static public assets
 │   ├── src/
-│   │   ├── assets/
+│   │   ├── assets/             # Images and shared styles
 │   │   ├── components/
+│   │   │   ├── Add.jsx
+│   │   │   ├── FinancialCard.jsx
+│   │   │   ├── GaugeCard.jsx
+│   │   │   ├── Helper.jsx
 │   │   │   ├── Layout.jsx
+│   │   │   ├── login.jsx
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Sidebar.jsx
-│   │   │   ├── Profile.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Signup.jsx
+│   │   │   ├── Signup.jsx
+│   │   │   ├── TimeFrame.jsx
+│   │   │   └── TransactionItem.jsx
 │   │   ├── pages/
 │   │   │   ├── Dashboard.jsx
+│   │   │   ├── Expense.jsx
 │   │   │   ├── Income.jsx
-│   │   │   └── Expense.jsx
-│   │   └── App.jsx
+│   │   │   └── Profile.jsx
+│   │   ├── utils/
+│   │   │   └── exportUtils.js  # Financial report export utilities
+│   │   ├── App.css
+│   │   ├── App.jsx             # Application routes and authentication state
+│   │   ├── index.css
+│   │   └── main.jsx            # Frontend entry point
+│   ├── .env                    # Frontend environment variables (not committed)
+│   ├── .gitignore
+│   ├── .oxlintrc.json
 │   └── package.json
 │
-├── server/                    # Node.js backend
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   ├── config/
-│   ├── server.js
-│   └── package.json
-│
-├── .gitignore
 └── README.md
 ```
 
