@@ -342,7 +342,7 @@ Potential enhancements include:
 - Improve accessibility and form validation.
 - Add automated deployment and continuous integration.
 
-## 🎯 What I Learned
+## 🎯 What I Learned 
 
 Through this project, I gained practical experience with:
 
