@@ -40,7 +40,7 @@ A full-stack **Expense Tracker and Finance Dashboard** built using the MERN stac
 - Change account password.
 - Log out securely.
 
-### 📈 Financial Reporting
+### 📈 Financial Reporting 
 - Visualize financial information through dashboard charts and category summaries.
 - Export financial reports to Excel for offline analysis.
 
@@ -50,7 +50,7 @@ A full-stack **Expense Tracker and Finance Dashboard** built using the MERN stac
 - Navigation through a navbar and sidebar.
 - Interactive forms, dropdown menus, modals, and notifications.
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack 
 
 | Technology | Purpose |
 |---|---|
